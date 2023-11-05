@@ -14,8 +14,12 @@
             padding: 0;
         }
 
+        body{
+            background-color: #EFB9C1D1;
+
+        }
         .header {
-            background-image: url('headerbg.jpg');
+            background-image: url('headerbg.png');
             background-size: contain;
             color: darkslategrey;
             font-size: 37px;
@@ -38,10 +42,19 @@
 
         .product-div {
             padding-bottom: 20px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .el-dropdown-link {
+            cursor: pointer;
+            color: #409EFF;
+        }
+
+        .el-icon-arrow-down {
+            font-size: 12px;
         }
     </style>
 </head>
@@ -56,10 +69,10 @@
             <el-col :span="12">
                 <el-col :span="24">
                     <div>
-                        <el-button @click="filterProducts('all')">All</el-button>
-                        <el-button @click="filterProducts('vegetable')">Vegetable Seeds</el-button>
-                        <el-button @click="filterProducts('flower')">Flower Seeds</el-button>
-                        <el-button @click="filterProducts('fruit')">Fruit Seeds</el-button>
+                        <el-button style="background-color: #ff6450; color: white;" @click="filterProducts('all')">All</el-button>
+                        <el-button style="background-color: #ff6450; color: white;" @click="filterProducts('vegetable')">Vegetable Seeds</el-button>
+                        <el-button style="background-color: #ff6450; color: white;" @click="filterProducts('flower')">Flower Seeds</el-button>
+                        <el-button style="background-color: #ff6450; color: white;" @click="filterProducts('fruit')">Fruit Seeds</el-button>
                     </div>
                 </el-col>
                 <el-col :span="8" v-for="(product, index) in filteredProducts" :key="index">
@@ -70,22 +83,52 @@
                             <p>{{ product.price }}</p>
                             <el-button size="mini" type="primary" @click="addToCart(product)">Add to Cart</el-button>
                             <el-button size="mini" type="success" style="margin-left: 0px; margin-top: 5px"
-                                       @click="changeSeed(product)">Try on Mine</el-button>
+                                       @click="changeSeed(product)">Try on Mine
+                            </el-button>
                         </div>
                     </div>
                 </el-col>
             </el-col>
             <el-col :span="12">
-                <el-upload
-                        class="upload-demo"
-                        drag
-                        action="#"
-                        show-file-list="false"
-                        :on-change="handlePicChange">
-                    <i class="el-icon-upload"></i>
-                    <div class="el-upload__text">Drag file to here or <em>click</em> to upload</div>
-                </el-upload>
-                <canvas id="canvas" width="500" height="500"></canvas>
+                <el-col :span="18">
+                    <el-upload
+                            class="upload-demo"
+                            drag
+                            action="#"
+                            show-file-list="false"
+                            :on-change="handlePicChange">
+                        <i class="el-icon-upload"></i>
+                        <div class="el-upload__text">Drag pic to here or <em>click</em> to upload</div>
+                        <div style="color: #606266; font-size: 14px;">💕Upload the pic where you plan to plant the seeds💕</div>
+                    </el-upload>
+                    <div>Choose product on "Try on Mine" button then click your pic to see how it will be like in the future!</div>
+                    <el-switch
+                            v-model="isWinter"
+                            active-text="winter"
+                            inactive-text="summer"
+                            active-color="blue"
+                            inactive-color="red"
+                            @change="switchSeason">
+                    </el-switch>
+                    <canvas id="canvas" width="500" height="500"></canvas>
+                    <div>{{plantingMessage}}</div>
+                </el-col>
+                <el-col :span="6">
+                    <el-dropdown>
+                        <span class="el-dropdown-link">
+                            Shopping Cart ({{cartItems.length}}) <i class="el-icon-arrow-down el-icon--right"></i>
+                        </span>
+
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item v-for="(item, index) in cartItems" :key="index">
+                                {{item.name}} - {{item.price}} - [remove]
+                            </el-dropdown-item>
+                            <el-drop-item>
+                                Total Price: £{{ totalCartPrice }}
+                            </el-drop-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                </el-col>
             </el-col>
         </el-row>
         <el-row>
@@ -99,6 +142,8 @@
         new Vue({
             el: '#app',
             data: {
+                isWinter: false,
+                overlayImages: [],
                 cartItems: [],
                 products: [
                     {
@@ -106,50 +151,69 @@
                         imageUrl: 'https://www.chilternseeds.co.uk/images/products/zoom/img_4408_988.jpg',
                         price: '£2.99',
                         category: 'flower',
-                        seedUrl: 'transparentTree.png',
+                        seedUrl: 'summer_sunflower.png',
+                        seedUrlWinter: 'winter_rosa.png'
                     },
                     {
                         name: 'Rose',
                         imageUrl: 'https://m.media-amazon.com/images/I/61ghm5nrHQL._AC_.jpg',
                         price: '£2.99',
                         category: 'flower',
-                        seedUrl: 'rsz_1rose.png'
+                        seedUrl: 'summer_rose.png',
+                        seedUrlWinter: 'winter_rose.png'
                     },
                     {
                         name: 'Lily',
                         imageUrl: 'https://www.bhg.com/thmb/yLe88KZ9Akid_h_QqITRiH2wQpA=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/100855507_preview-afb5bbe9dbf2432f81462b14e41a6c4c.jpg',
                         price: '£2.99',
-                        category: 'flower'
+                        category: 'flower',
+                        seedUrl: 'summer_bush.png',
+                        seedUrlWinter: 'winter_bush.png'
                     },
                     {
                         name: 'Carrot',
                         imageUrl: 'https://greenvegetableseeds.com/wp-content/uploads/2016/01/Carrot-Romance-F1-www.greenvegetableseeds.com_.jpg',
                         price: '£3.99',
-                        category: 'vegetable'
+                        category: 'vegetable',
+                        seedUrl: 'summer_carrot.png',
+                        seedUrlWinter: 'winter_carrot.png'
                     },
                     {
                         name: 'Lettuce',
                         imageUrl: 'https://m.media-amazon.com/images/I/81-H9Gy4+2L._AC_SL1280_.jpg',
                         price: '£3.99',
-                        category: 'vegetable'
+                        category: 'vegetable',
+                        seedUrl: 'summer_bush.png',
+                        seedUrlWinter: 'winter_bush.png'
                     },
                     {
                         name: 'Cranberry',
                         imageUrl: 'https://www.suttons.co.uk/product_images/VECRA37600.jpg',
                         price: '£2.99',
-                        category: 'fruit'
+                        category: 'fruit',
+                        seedUrl: 'summer_bush.png',
+                        seedUrlWinter: 'winter_bush.png'
                     },
                     {
                         name: 'Strawberry',
                         imageUrl: 'https://www.suttons.co.uk/product_images/VESTR22389.jpg',
                         price: '£0.99',
-                        category: 'fruit'
+                        category: 'fruit',
+                        seedUrl: 'summer_bush.png',
+                        seedUrlWinter: 'winter_bush.png'
                     },
                 ],
                 selectedCategory: 'all',
-                overlayImage: '',
+                overlayImage: {
+                    src: '', // 图像路径
+                    width: 0, // 图像宽度
+                    height: 0, // 图像高度
+                },
                 canvas: null,
-                ctx: null
+                ctx: null,
+                canvasImgSrc: '',
+                plantedPoints: [],
+                plantingMessage: '',
             },
             computed: {
                 filteredProducts() {
@@ -157,41 +221,115 @@
                         return this.products;
                     }
                     return this.products.filter(product => product.category === this.selectedCategory);
+                },
+                totalCartPrice() {
+                    return this.cartItems.reduce((total, item) => {
+                        // 将每个商品的价格相加以计算总价
+                        return total + parseFloat(item.price.replace('£', '')); // 去除价格中的 '£' 并转为浮点数
+                    }, 0).toFixed(2); // 四舍五入保留两位小数
                 }
             },
             methods: {
+                switchSeason() {
+                    if (this.isWinter) {
+                        this.overlayImage.src = this.overlayImage.src.replace("summer", "winter");
+                    } else {
+                        this.overlayImage.src = this.overlayImage.src.replace("winter", "summer");
+                    }
+
+                    // 清空画布
+                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                    // 重新绘制背景图
+                    let gardenPic = new Image();
+                    gardenPic.src = this.canvasImgSrc;
+                    gardenPic.onload = () => {
+                        this.ctx.drawImage(gardenPic, 0, 0, this.canvas.width, this.canvas.height);
+
+                        // 重新绘制已经种植的植物
+                        this.overlayImages.forEach((e) => {
+                            if (this.isWinter) {
+                                e.src = e.src.replace('summer', 'winter');
+                            } else {
+                                e.src = e.src.replace('winter', 'summer');
+                            }
+                            let tempOverlayImage = new Image();
+                            tempOverlayImage.onload = () => {
+                                // must wait until the image onload, otherwise the height and width will be 0
+                                this.ctx.drawImage(tempOverlayImage, e.x - tempOverlayImage.width / 2, e.y - tempOverlayImage.height, tempOverlayImage.width, tempOverlayImage.height);
+                            };
+                            const filename = e.src.split('/').pop();
+                            tempOverlayImage.src = filename;
+                        });
+                    };
+                },
                 handlePicChange(file) {
                     this.canvas = document.getElementById("canvas");
                     this.ctx = this.canvas.getContext("2d");
                     let gardenPic = new Image();
                     gardenPic.src = window.URL.createObjectURL(file.raw);
+                    this.canvasImgSrc = window.URL.createObjectURL(file.raw);
                     gardenPic.onload = () => {
                         this.ctx.drawImage(gardenPic, 0, 0, this.canvas.width, this.canvas.height);
                     }
-                    this.canvas.addEventListener('mousedown', (e) => {
+
+                    // 先解绑之前的事件处理函数
+                    this.canvas.removeEventListener('mousedown', this.mousedownHandler);
+
+                    // 绑定新的事件处理函数
+                    this.mousedownHandler = (e) => {
                         this.plant(e.offsetX, e.offsetY);
-                    });
-                },
+                    };
+                    this.canvas.addEventListener('mousedown', this.mousedownHandler);
+                }
+                ,
                 addToCart(product) {
-                    // 添加购物车逻辑
-                    // 这里可以实现将商品加入购物车的功能
+                    this.cartItems.push(product);
                 },
                 filterProducts(category) {
                     this.selectedCategory = category;
                 },
                 plant(x, y) {
+                    if (this.isPointInRadius(x, y, 77)) {
+                        this.plantingMessage = 'Too close to existed plant. They need enough space to grow😊';
+                        return;
+                    } else {
+                        this.plantingMessage = '';
+                    }
                     this.ctx.drawImage(this.overlayImage, x - this.overlayImage.width / 2, y - this.overlayImage.height, this.overlayImage.width, this.overlayImage.height);
+                    console.log(this.overlayImage)
+                    console.log(x)
+                    console.log(y)
+                    console.log(this.overlayImage.width)
+                    console.log(this.overlayImage.height)
+                    const OverlayImage4Log = {};
+                    OverlayImage4Log.src = this.overlayImage.src;
+                    OverlayImage4Log.x = x;
+                    OverlayImage4Log.y = y;
+                    this.overlayImages.push(OverlayImage4Log);
+                    this.plantedPoints.push({x, y});
                 },
-                changeSeed(seed){
-                    console.log(seed);
-                    this.overlayImage.src=seed.seedUrl;
-                }
+                changeSeed(seed) {
+                    if (this.isWinter) {
+                        this.overlayImage.src = seed.seedUrlWinter;
+                    } else {
+                        this.overlayImage.src = seed.seedUrl;
+                    }
+                },
+                isPointInRadius(x, y, radius) {
+                    for (const point of this.plantedPoints) {
+                        const distance = Math.sqrt(Math.pow(x - point.x, 2) + Math.pow(y - point.y, 2));
+                        if (distance < radius) {
+                            return true;
+                        }
+                    }
+                    return false;
+                },
             },
             created() {
                 this.canvas = document.getElementById("canvas");
                 this.ctx = this.canvas.getContext("2d");
                 this.overlayImage = new Image();
-                this.overlayImage.src = 'transparentTree.png';
             }
         });
     </script>
