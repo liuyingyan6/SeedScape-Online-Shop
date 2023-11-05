@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #canvas {
+            background-color: Brown;
+        }
+    </style>
+</head>
+<body>
+<canvas id="canvas" width="500" height="500"></canvas>
+<p>拓展点：植物酸碱度隔离、不同季节展示、需要获取用户地理环境；上传图片识别植；考虑发芽生长成功率；拓展：家居、摆设类都可以放上去</p>
+<script>
+    // let painting = false;
+    // let startPoint = {x: undefined, y: undefined};
+    let canvas = document.getElementById("canvas");
+    let ctx = canvas.getContext("2d");
+
+    // 使用drawImage方法将图像绘制到Canvas上
+    let image = new Image();
+    image.src='https://previews.123rf.com/images/paulmaguire/paulmaguire1810/paulmaguire181000019/110698731-preparing-a-garden-flowerbed-for-planting-the-flower-bed-is-shown-freshly-dug-and-empty.jpg';
+
+    let overlayImage = new Image();
+    overlayImage.src='../static/img/transparentTree.png';
+
+    image.onload=function () {
+        ctx.drawImage(image,0,0,canvas.width,canvas.height);
+    }
+
+    canvas.onmousedown = (e) => {
+
+        // painting=true
+        let x = e.offsetX;
+        let y = e.offsetY;
+        ctx.drawImage(overlayImage, (x-overlayImage.width/2), y-overlayImage.height, overlayImage.width, overlayImage.height);
+
+        // let newPoint = {x: x, y: y};
+        // if (painting) {
+        //     drawLine(startPoint.x, startPoint.y, newPoint.x, newPoint.y);
+        //     startPoint = newPoint;
+        // }
+    };
+    // canvas.onmouseup = () => {
+    //     painting = false;
+    // };
+
+    // function drawLine(xStart, yStart, xEnd, yEnd) {
+    //     ctx.beginPath();
+    //     ctx.lineWidth = 3;
+    //     ctx.moveTo(xStart, yStart);
+    //     ctx.lineTo(xEnd, yEnd);
+    //     ctx.stroke();
+    //     ctx.closePath();
+    // }
+
+    // ctx.beginPath();
+    // ctx.moveTo(100,100);
+    // ctx.lineTo(200,200);
+    // ctx.lineTo(200,200);
+    // ctx.lineTo(300,200);
+    // ctx.stroke();
+</script>
+</body>
+</html>
